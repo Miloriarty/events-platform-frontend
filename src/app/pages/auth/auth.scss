@@ -1,0 +1,27 @@
+:host {
+  display: flex;
+  justify-content: center;
+  padding-top: 32px;
+}
+
+mat-card {
+  width: 100%;
+  max-width: 440px;
+}
+
+mat-card-content {
+  padding-top: 16px;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}

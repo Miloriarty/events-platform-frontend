@@ -1,59 +1,44 @@
-# EventsPlatformFrontend
+# Events Platform — frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.4.
+Клиент на Angular 22 + Angular Material для бэкенда [events-platform](../../IdeaProjects/events-platform)
+(Spring Cloud, вход через `api-gateway` на `:8080`).
 
-## Development server
-
-To start a local development server, run:
-
-```bash
-ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Запуск
 
 ```bash
-ng generate component component-name
+npm install
+npm start          # http://localhost:4200
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Dev-сервер проксирует `/api/**` на `http://localhost:8080` (`proxy.conf.json`), поэтому CORS на gateway
+не нужен. Сначала поднимите бэкенд (config-server → discovery → сервисы → api-gateway).
+Вход по умолчанию: `admin` / `admin123`.
+
+## Что есть
+
+| Раздел | Кому | API |
+|---|---|---|
+| Мероприятия: список, поиск, карточка | всем | `GET /api/events`, `/search`, `/{id}` |
+| Создание / изменение / удаление мероприятия | MANAGER (свои), ADMIN | `POST/PUT/DELETE /api/events` |
+| Участники мероприятия | организатор, ADMIN | `GET /api/registrations/event/{id}` |
+| Мои мероприятия | MANAGER, ADMIN | `GET /api/events/my` |
+| Билеты: покупка через корзину | авторизованные | `GET /api/tickets`, `POST /api/orders` |
+| Типы билетов (CRUD) | MANAGER, ADMIN | `/api/tickets` |
+| Заказы, отмена | авторизованные (ADMIN видит все) | `/api/orders` |
+| Регистрация на мероприятие по позиции заказа, отмена | авторизованные | `/api/registrations` |
+| Справочники: категории, локации | MANAGER, ADMIN | `/api/categories`, `/api/locations` |
+| Пользователи | ADMIN | `/api/users` |
+
+JWT хранится в `localStorage`; роль и id берутся из claims токена (`sub`, `role`, `username`).
+На `401` клиент разлогинивает и отправляет на страницу входа.
+
+## Структура
+
+- `src/app/core` — модели DTO, `AuthService`, интерцептор, гарды, API-сервисы, уведомления об ошибках (`ProblemDetail`)
+- `src/app/shared` — диалоги подтверждения и формы справочников
+- `src/app/pages` — страницы (lazy-маршруты в `app.routes.ts`)
 
 ```bash
-ng generate --help
+npm run build
+npm test
 ```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
