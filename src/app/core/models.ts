@@ -68,6 +68,8 @@ export interface EventItem {
   category: Category;
   organizerId: number;
   maxParticipants: number;
+  // /api/events/{id}/image?v=...; null — картинки нет
+  imageUrl: string | null;
 }
 
 export interface EventRequest {

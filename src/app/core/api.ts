@@ -72,6 +72,17 @@ export class EventsApi extends Resource<EventItem, EventRequest> {
   my(): Observable<EventItem[]> {
     return this.http.get<EventItem[]>(`${this.url}/my`);
   }
+
+  // multipart: Content-Type с boundary проставит браузер
+  uploadImage(id: number, file: File): Observable<EventItem> {
+    const body = new FormData();
+    body.append('file', file);
+    return this.http.put<EventItem>(`${this.url}/${id}/image`, body);
+  }
+
+  deleteImage(id: number): Observable<EventItem> {
+    return this.http.delete<EventItem>(`${this.url}/${id}/image`);
+  }
 }
 
 @Injectable({ providedIn: 'root' })

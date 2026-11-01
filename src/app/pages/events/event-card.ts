@@ -12,6 +12,13 @@ import { EventItem } from '../../core/models';
   template: `
     <a [routerLink]="['/events', event().id]" class="card-link">
       <mat-card appearance="outlined" [class.past]="past()">
+        <div class="cover">
+          @if (event().imageUrl; as url) {
+            <img [src]="url" alt="" loading="lazy" />
+          } @else {
+            <mat-icon>event</mat-icon>
+          }
+        </div>
         <mat-card-header>
           <mat-card-subtitle class="category">{{ event().category.name }}</mat-card-subtitle>
           <mat-card-title>{{ event().title }}</mat-card-title>
@@ -61,6 +68,26 @@ import { EventItem } from '../../core/models';
     }
     mat-card.past {
       opacity: 0.7;
+    }
+    .cover {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: var(--mat-sys-corner-medium) var(--mat-sys-corner-medium) 0 0;
+      background: var(--mat-sys-surface-container-high);
+      color: var(--mat-sys-outline);
+    }
+    .cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .cover mat-icon {
+      width: 48px;
+      height: 48px;
+      font-size: 48px;
     }
     .category {
       color: var(--mat-sys-primary);

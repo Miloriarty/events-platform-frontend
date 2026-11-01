@@ -20,6 +20,7 @@ Dev-сервер проксирует `/api/**` на `http://localhost:8080` (`p
 |---|---|---|
 | Мероприятия: список, поиск, карточка | всем | `GET /api/events`, `/search`, `/{id}` |
 | Создание / изменение / удаление мероприятия | MANAGER (свои), ADMIN | `POST/PUT/DELETE /api/events` |
+| Картинка мероприятия: drag & drop в форме, показ в карточке и на странице | загрузка — MANAGER (свои), ADMIN; просмотр — всем | `PUT/DELETE/GET /api/events/{id}/image` |
 | Участники мероприятия | организатор, ADMIN | `GET /api/registrations/event/{id}` |
 | Мои мероприятия | MANAGER, ADMIN | `GET /api/events/my` |
 | Билеты: покупка через корзину | авторизованные | `GET /api/tickets`, `POST /api/orders` |
@@ -35,7 +36,7 @@ JWT хранится в `localStorage`; роль и id берутся из claim
 ## Структура
 
 - `src/app/core` — модели DTO, `AuthService`, интерцептор, гарды, API-сервисы, уведомления об ошибках (`ProblemDetail`)
-- `src/app/shared` — диалоги подтверждения и формы справочников
+- `src/app/shared` — диалоги подтверждения, формы справочников, поле картинки с drag & drop (`image-drop.ts`)
 - `src/app/pages` — страницы (lazy-маршруты в `app.routes.ts`)
 
 ```bash

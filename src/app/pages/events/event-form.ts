@@ -16,11 +16,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { Router, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { catchError, forkJoin, map, Observable, of, switchMap } from 'rxjs';
 import { CategoriesApi, EventsApi, LocationsApi } from '../../core/api';
 import { fromIsoDate, toIsoDate } from '../../core/dates';
-import { Category, EventRequest, Location } from '../../core/models';
-import { Notify } from '../../core/notify';
+import { Category, EventItem, EventRequest, Location } from '../../core/models';
+import { errorMessage, Notify } from '../../core/notify';
+import { ImageDrop } from '../../shared/image-drop';
 
 function dateRange(group: AbstractControl): ValidationErrors | null {
   const start = group.get('startDate')?.value as Date | null;
@@ -41,6 +42,7 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
+    ImageDrop,
   ],
   template: `
     <div class="page-header">
@@ -59,6 +61,8 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
             <mat-error>Введите название</mat-error>
           </mat-form-field>
 
+          <app-image-drop [(value)]="image" />
+
           <mat-form-field class="full-width">
             <mat-label>Описание</mat-label>
             <textarea matInput formControlName="description" rows="4"></textarea>
@@ -67,14 +71,20 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
           <div class="form-grid">
             <mat-form-field>
               <mat-label>Период проведения</mat-label>
-              <mat-date-range-input [rangePicker]="picker">
+              <mat-date-range-input [rangePicker]="picker" [min]="minStartDate()">
                 <input matStartDate formControlName="startDate" placeholder="Начало" />
                 <input matEndDate formControlName="endDate" placeholder="Окончание" />
               </mat-date-range-input>
               <mat-datepicker-toggle matIconSuffix [for]="picker" />
               <mat-date-range-picker #picker />
               <mat-hint>ДД.ММ.ГГГГ – ДД.ММ.ГГГГ</mat-hint>
-              <mat-error>Укажите даты начала и окончания</mat-error>
+              <mat-error>
+                @if (form.controls.startDate.hasError('matDatepickerMin')) {
+                  Дата начала не может быть в прошлом
+                } @else {
+                  Укажите даты начала и окончания
+                }
+              </mat-error>
             </mat-form-field>
 
             <mat-form-field>
@@ -126,6 +136,11 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
           @if (form.hasError('range')) {
             <p class="error">Дата окончания раньше даты начала</p>
           }
+          @if (
+            form.hasError('pastStart') && !form.controls.startDate.hasError('matDatepickerMin')
+          ) {
+            <p class="error">Дата начала не может быть в прошлом</p>
+          }
 
           <div class="actions">
             <a matButton [routerLink]="id() ? ['/events', id()] : '/events'">Отмена</a>
@@ -165,6 +180,16 @@ export class EventForm implements OnInit {
   protected readonly saving = signal(false);
   protected readonly categories = signal<Category[]>([]);
   protected readonly locations = signal<Location[]>([]);
+  // File — новая картинка, string — текущая с сервера, null — без картинки
+  protected readonly image = signal<File | string | null>(null);
+  private originalImageUrl: string | null = null;
+  // при редактировании уже прошедшего мероприятия его прежняя дата начала допустима
+  private readonly originalStart = signal<string | null>(null);
+  private readonly today = fromIsoDate(toIsoDate(new Date()));
+  protected readonly minStartDate = computed(() => {
+    const original = this.originalStart();
+    return original && fromIsoDate(original) < this.today ? fromIsoDate(original) : this.today;
+  });
 
   protected readonly form = inject(NonNullableFormBuilder).group(
     {
@@ -176,7 +201,7 @@ export class EventForm implements OnInit {
       locationId: [null as number | null, Validators.required],
       maxParticipants: [null as number | null, Validators.min(1)],
     },
-    { validators: dateRange },
+    { validators: [dateRange, (group) => this.startNotInPast(group)] },
   );
 
   private readonly locationId = toSignal(this.form.controls.locationId.valueChanges);
@@ -212,6 +237,10 @@ export class EventForm implements OnInit {
           locationId: e.location.id,
           maxParticipants: e.maxParticipants,
         });
+        this.originalImageUrl = e.imageUrl;
+        this.originalStart.set(e.startDate);
+        this.form.updateValueAndValidity();
+        this.image.set(e.imageUrl);
         this.loading.set(false);
       },
       error: (err) => {
@@ -238,15 +267,44 @@ export class EventForm implements OnInit {
     };
     const id = this.id();
     this.saving.set(true);
-    (id ? this.events.update(Number(id), body) : this.events.create(body)).subscribe({
-      next: (e) => {
-        this.notify.success(id ? 'Изменения сохранены' : 'Мероприятие создано');
-        this.router.navigate(['/events', e.id]);
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.notify.error(err);
-      },
-    });
+    (id ? this.events.update(Number(id), body) : this.events.create(body))
+      .pipe(switchMap((e) => this.saveImage(e)))
+      .subscribe({
+        next: ({ event, imageError }) => {
+          if (imageError) {
+            // мероприятие уже сохранено, не теряем его из-за картинки
+            this.notify.error(
+              `Мероприятие сохранено, но картинку сохранить не удалось: ${imageError}`,
+            );
+          } else {
+            this.notify.success(id ? 'Изменения сохранены' : 'Мероприятие создано');
+          }
+          this.router.navigate(['/events', event.id]);
+        },
+        error: (err) => {
+          this.saving.set(false);
+          this.notify.error(err);
+        },
+      });
+  }
+
+  // Как на бэкенде: новая дата начала не раньше сегодня, прежнюю дату менять не обязательно
+  private startNotInPast(group: AbstractControl): ValidationErrors | null {
+    const start = group.get('startDate')?.value as Date | null;
+    if (!start || toIsoDate(start) === this.originalStart()) return null;
+    return start < this.today ? { pastStart: true } : null;
+  }
+
+  // Картинка уходит отдельным запросом после сохранения: для нового мероприятия нужен его id
+  private saveImage(event: EventItem): Observable<{ event: EventItem; imageError?: string }> {
+    const image = this.image();
+    let request: Observable<EventItem> | null = null;
+    if (image instanceof File) request = this.events.uploadImage(event.id, image);
+    else if (image === null && this.originalImageUrl) request = this.events.deleteImage(event.id);
+    if (!request) return of({ event });
+    return request.pipe(
+      map((updated) => ({ event: updated })),
+      catchError((err) => of({ event, imageError: errorMessage(err) })),
+    );
   }
 }

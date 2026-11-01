@@ -52,6 +52,10 @@ import { RegisterDialog } from './register-dialog';
         }
       </div>
 
+      @if (e.imageUrl; as url) {
+        <img class="hero" [src]="url" [alt]="e.title" />
+      }
+
       <div class="layout">
         <mat-card appearance="outlined" class="info">
           <mat-card-content>
@@ -163,6 +167,14 @@ import { RegisterDialog } from './register-dialog';
   styles: `
     .back {
       margin-bottom: 8px;
+    }
+    .hero {
+      display: block;
+      width: 100%;
+      max-height: 400px;
+      margin-bottom: 16px;
+      object-fit: cover;
+      border-radius: var(--mat-sys-corner-large);
     }
     .layout {
       display: grid;
