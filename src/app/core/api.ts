@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import {
+  AppNotification,
   Category,
   EventItem,
   EventRequest,
@@ -146,5 +147,29 @@ export class RegistrationsApi {
 
   cancel(id: number): Observable<Registration> {
     return this.http.post<Registration>(`${this.url}/${id}/cancel`, {});
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class NotificationsApi {
+  private readonly http = inject(HttpClient);
+  private readonly url = '/api/notifications';
+
+  page(page = 0, size = 10): Observable<Page<AppNotification>> {
+    return this.http
+      .get<unknown>(this.url, { params: pageParams(page, size) })
+      .pipe(map(toPage<AppNotification>));
+  }
+
+  unreadCount(): Observable<number> {
+    return this.http.get<{ count: number }>(`${this.url}/unread-count`).pipe(map((r) => r.count));
+  }
+
+  markRead(id: number): Observable<AppNotification> {
+    return this.http.post<AppNotification>(`${this.url}/${id}/read`, {});
+  }
+
+  markAllRead(): Observable<void> {
+    return this.http.post<void>(`${this.url}/read-all`, {});
   }
 }

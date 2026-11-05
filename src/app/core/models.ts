@@ -124,3 +124,19 @@ export interface Registration {
   registrationDate: string;
   status: RegistrationStatus;
 }
+
+// notification-service
+export type NotificationType =
+  'ORDER_CREATED' | 'ORDER_CANCELLED' | 'REGISTRATION_CREATED' | 'REGISTRATION_CANCELLED';
+
+// Не Notification: так называется браузерный API
+export interface AppNotification {
+  id: number;
+  type: NotificationType;
+  title: string;
+  message: string;
+  // маршрут клиента, например /orders
+  link: string;
+  read: boolean;
+  createdAt: string;
+}

@@ -62,6 +62,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/registrations/registrations').then((m) => m.Registrations),
   },
   {
+    path: 'notifications',
+    canActivate: [authGuard],
+    title: 'Уведомления',
+    loadComponent: () => import('./pages/notifications/notifications').then((m) => m.Notifications),
+  },
+  {
     path: 'catalog',
     canActivate: [roleGuard('MANAGER', 'ADMIN')],
     title: 'Справочники',

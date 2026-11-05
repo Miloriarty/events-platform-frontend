@@ -12,6 +12,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { map } from 'rxjs';
 import { AuthService } from './core/auth';
 import { Role } from './core/models';
+import { NotificationBell } from './shared/notification-bell';
 
 interface NavItem {
   path: string;
@@ -50,6 +51,7 @@ const ROLE_LABELS: Record<Role, string> = {
     MatButtonModule,
     MatMenuModule,
     MatDividerModule,
+    NotificationBell,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',

@@ -5,12 +5,12 @@
     </button>
   }
   <a class="brand" routerLink="/events">
-    <mat-icon>celebration</mat-icon>
     <span>Events Platform</span>
   </a>
   <span class="spacer"></span>
 
   @if (auth.user(); as user) {
+    <app-notification-bell />
     <button matButton [matMenuTriggerFor]="userMenu" class="user-button">
       <mat-icon>account_circle</mat-icon>
       {{ user.username }}

@@ -29,14 +29,15 @@ Dev-сервер проксирует `/api/**` на `http://localhost:8080` (`p
 | Регистрация на мероприятие по позиции заказа, отмена | авторизованные | `/api/registrations` |
 | Справочники: категории, локации | MANAGER, ADMIN | `/api/categories`, `/api/locations` |
 | Пользователи | ADMIN | `/api/users` |
+| Уведомления: колокольчик со счётчиком, история, всплывающие и системные уведомления браузера | авторизованные | `/api/notifications` |
 
 JWT хранится в `localStorage`; роль и id берутся из claims токена (`sub`, `role`, `username`).
 На `401` клиент разлогинивает и отправляет на страницу входа.
 
 ## Структура
 
-- `src/app/core` — модели DTO, `AuthService`, интерцептор, гарды, API-сервисы, уведомления об ошибках (`ProblemDetail`)
-- `src/app/shared` — диалоги подтверждения, формы справочников, поле картинки с drag & drop (`image-drop.ts`)
+- `src/app/core` — модели DTO, `AuthService`, интерцептор, гарды, API-сервисы, сообщения об ошибках (`ProblemDetail`), поток уведомлений (`notifications.ts`)
+- `src/app/shared` — диалоги подтверждения, формы справочников, поле картинки с drag & drop (`image-drop.ts`), колокольчик (`notification-bell.ts`)
 - `src/app/pages` — страницы (lazy-маршруты в `app.routes.ts`)
 
 ```bash
