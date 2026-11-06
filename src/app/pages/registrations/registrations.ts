@@ -14,6 +14,7 @@ import { AuthService } from '../../core/auth';
 import { Registration } from '../../core/models';
 import { Notify } from '../../core/notify';
 import { confirm } from '../../shared/confirm-dialog';
+import { PassDialog } from './pass-dialog';
 
 @Component({
   selector: 'app-registrations',
@@ -67,12 +68,25 @@ import { confirm } from '../../shared/confirm-dialog';
               >
                 {{ r.status === 'CONFIRMED' ? 'Подтверждена' : 'Отменена' }}
               </span>
+              @if (r.checkedInAt) {
+                <span
+                  class="status-chip"
+                  [matTooltip]="'Вход ' + (r.checkedInAt | date: 'd MMM y, HH:mm')"
+                >
+                  Использован
+                </span>
+              }
             </td>
           </ng-container>
           <ng-container matColumnDef="actions">
             <th mat-header-cell *matHeaderCellDef></th>
             <td mat-cell *matCellDef="let r" class="row-actions">
               @if (r.status === 'CONFIRMED') {
+                @if (!r.checkedInAt) {
+                  <button matIconButton matTooltip="Билет с QR-кодом" (click)="openPass(r)">
+                    <mat-icon>qr_code_2</mat-icon>
+                  </button>
+                }
                 <button matIconButton matTooltip="Отменить регистрацию" (click)="cancel(r)">
                   <mat-icon>event_busy</mat-icon>
                 </button>
@@ -108,6 +122,23 @@ import { confirm } from '../../shared/confirm-dialog';
     mat-paginator {
       background: transparent;
     }
+    /* на телефоне кнопка билета должна помещаться без прокрутки таблицы */
+    @media (max-width: 700px) {
+      .mat-column-user,
+      .mat-column-item,
+      .mat-column-date {
+        display: none;
+      }
+      .mat-mdc-header-cell,
+      .mat-mdc-cell:not(.row-actions) {
+        padding-inline: 8px;
+      }
+      .mat-mdc-cell.row-actions {
+        width: 96px;
+        min-width: 96px;
+        padding: 0;
+      }
+    }
   `,
 })
 export class Registrations implements OnInit {
@@ -136,6 +167,10 @@ export class Registrations implements OnInit {
     this.pageIndex.set(e.pageIndex);
     this.pageSize.set(e.pageSize);
     this.load();
+  }
+
+  openPass(r: Registration): void {
+    this.dialog.open(PassDialog, { data: r, width: '420px' });
   }
 
   cancel(r: Registration): void {

@@ -68,7 +68,9 @@ export interface EventItem {
   category: Category;
   organizerId: number;
   maxParticipants: number;
-  // /api/events/{id}/image?v=...; null — картинки нет
+  // минимальная цена билета для регистрации; 0 - подходит любой билет
+  minTicketPrice: number;
+  // /api/events/{id}/image?v=...; null - картинки нет
   imageUrl: string | null;
 }
 
@@ -80,6 +82,7 @@ export interface EventRequest {
   locationId: number;
   categoryId: number;
   maxParticipants: number | null;
+  minTicketPrice: number;
 }
 
 // booking-service
@@ -113,6 +116,17 @@ export interface OrderRequest {
   items: { ticketId: number; quantity: number }[];
 }
 
+// Своя позиция неотмененного заказа с неиспользованными билетами
+export interface AvailableOrderItem {
+  orderItemId: number;
+  orderId: number;
+  orderDate: string;
+  ticketType: string;
+  unitPrice: number;
+  quantity: number;
+  remaining: number;
+}
+
 export type RegistrationStatus = 'CONFIRMED' | 'CANCELLED';
 
 export interface Registration {
@@ -121,13 +135,20 @@ export interface Registration {
   eventId: number;
   eventTitle: string;
   orderItemId: number;
+  ticketType: string;
   registrationDate: string;
   status: RegistrationStatus;
+  // время прохода на мероприятие; null - билет не использован
+  checkedInAt: string | null;
 }
 
 // notification-service
 export type NotificationType =
-  'ORDER_CREATED' | 'ORDER_CANCELLED' | 'REGISTRATION_CREATED' | 'REGISTRATION_CANCELLED';
+  | 'ORDER_CREATED'
+  | 'ORDER_CANCELLED'
+  | 'REGISTRATION_CREATED'
+  | 'REGISTRATION_CANCELLED'
+  | 'EVENT_REMINDER';
 
 // Не Notification: так называется браузерный API
 export interface AppNotification {
@@ -139,4 +160,38 @@ export interface AppNotification {
   link: string;
   read: boolean;
   createdAt: string;
+}
+
+// ticket-pass-service
+export interface Pass {
+  registrationId: number;
+  eventId: number;
+  eventTitle: string;
+  ticketType: string;
+  startDate: string;
+  endDate: string;
+  locationName: string;
+  locationAddress: string;
+  token: string;
+  // страница проверки билета, она же содержимое QR-кода
+  checkInUrl: string;
+  // data URI с PNG
+  qrCode: string;
+}
+
+export interface CheckInResult {
+  registrationId: number;
+  userId: number;
+  eventId: number;
+  eventTitle: string;
+  ticketType: string;
+  checkedInAt: string;
+}
+
+// reminder-service
+export interface ReminderRun {
+  date: string;
+  events: number;
+  published: number;
+  failed: number;
 }

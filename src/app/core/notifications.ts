@@ -15,7 +15,7 @@ export interface SseMessage {
   data: string;
 }
 
-// Блок SSE: строки event:/data:, разделитель блоков — пустая строка; строки с «:» — комментарии
+// Блок SSE: строки event:/data:, разделитель блоков - пустая строка; строки с «:» - комментарии
 export function parseSseBlock(block: string): SseMessage | null {
   let event = 'message';
   const data: string[] = [];
@@ -38,7 +38,7 @@ export async function readSse(
     if (done) return;
     buffer += decoder.decode(value, { stream: true });
     const blocks = buffer.split(/\r?\n\r?\n/);
-    buffer = blocks.pop() ?? ''; // последний блок может быть ещё не дописан
+    buffer = blocks.pop() ?? ''; // последний блок может быть еще не дописан
     for (const block of blocks) {
       const message = parseSseBlock(block);
       if (message) onMessage(message);
@@ -66,7 +66,7 @@ export class NotificationCenter {
   readonly recent = signal<AppNotification[]>([]);
   readonly unreadCount = signal(0);
   readonly permission = signal(browserPermission());
-  // растёт при любом изменении: страница уведомлений по нему перечитывает список
+  // растет при любом изменении: страница уведомлений по нему перечитывает список
   readonly revision = signal(0);
 
   constructor() {
@@ -124,7 +124,7 @@ export class NotificationCenter {
           signal,
         });
         if (response.status === 401) {
-          this.refresh(); // интерцептор HttpClient разлогинит и уведёт на страницу входа
+          this.refresh(); // интерцептор HttpClient разлогинит и уведет на страницу входа
           return;
         }
         if (response.ok && response.body) {
@@ -166,7 +166,7 @@ export class NotificationCenter {
     }
   }
 
-  // Поток открыт в каждой вкладке; одинаковый tag не даёт показать уведомление несколько раз
+  // Поток открыт в каждой вкладке; одинаковый tag не дает показать уведомление несколько раз
   private showSystemNotification(notification: AppNotification): void {
     const popup = new Notification(notification.title, {
       body: notification.message,

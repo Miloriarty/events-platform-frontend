@@ -46,7 +46,7 @@ import { confirm } from '../../shared/confirm-dialog';
             <mat-expansion-panel-header>
               <mat-panel-title>Заказ #{{ o.id }}</mat-panel-title>
               <mat-panel-description>
-                <span>{{ o.orderDate | date: 'd MMM y, HH:mm' }}</span>
+                <span class="hide-xs">{{ o.orderDate | date: 'd MMM y, HH:mm' }}</span>
                 @if (auth.isAdmin()) {
                   <span class="hide-sm">пользователь {{ o.userId }}</span>
                 }
@@ -117,6 +117,10 @@ import { confirm } from '../../shared/confirm-dialog';
       --mat-expansion-container-background-color: var(--mat-sys-surface-container-high);
       --mat-expansion-header-hover-state-layer-color: var(--mat-sys-surface-container-highest);
     }
+    mat-panel-title,
+    mat-panel-description {
+      white-space: nowrap;
+    }
     mat-panel-description {
       display: flex;
       align-items: center;
@@ -148,9 +152,17 @@ import { confirm } from '../../shared/confirm-dialog';
     mat-paginator {
       background: transparent;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 1000px) {
       .hide-sm {
         display: none;
+      }
+    }
+    @media (max-width: 600px) {
+      .hide-xs {
+        display: none;
+      }
+      mat-panel-description {
+        gap: 8px;
       }
     }
   `,

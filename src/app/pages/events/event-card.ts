@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,7 +8,7 @@ import { EventItem } from '../../core/models';
 
 @Component({
   selector: 'app-event-card',
-  imports: [RouterLink, DatePipe, MatCardModule, MatIconModule],
+  imports: [RouterLink, DatePipe, CurrencyPipe, MatCardModule, MatIconModule],
   template: `
     <a [routerLink]="['/events', event().id]" class="card-link">
       <mat-card appearance="outlined" [class.past]="past()">
@@ -42,6 +42,12 @@ import { EventItem } from '../../core/models';
             <mat-icon>groups</mat-icon>
             <span>до {{ event().maxParticipants }} участников</span>
           </div>
+          @if (event().minTicketPrice > 0) {
+            <div class="meta">
+              <mat-icon>confirmation_number</mat-icon>
+              <span>билет от {{ event().minTicketPrice | currency: 'RUB' }}</span>
+            </div>
+          }
           @if (past()) {
             <span class="status-chip off">Завершено</span>
           }
@@ -100,8 +106,11 @@ import { EventItem } from '../../core/models';
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      overflow-wrap: anywhere;
       color: var(--mat-sys-on-surface-variant);
-      min-height: 2.8em;
+      /* высота ровно в две строки: если блок выше, в запас попадает верх третьей строки */
+      line-height: 1.5;
+      height: 3em;
     }
     .meta {
       display: flex;

@@ -3,19 +3,23 @@ import { inject, Injectable } from '@angular/core';
 import { map, Observable } from 'rxjs';
 import {
   AppNotification,
+  AvailableOrderItem,
   Category,
+  CheckInResult,
   EventItem,
   EventRequest,
   Location,
   Order,
   OrderRequest,
   Page,
+  Pass,
   Registration,
+  ReminderRun,
   Ticket,
   User,
 } from './models';
 
-// Большинство эндпоинтов отдают PagedModel ({content, page}), а /api/users — сырой Page
+// Большинство эндпоинтов отдают PagedModel ({content, page}), а /api/users - сырой Page
 // ({content, totalElements, number, ...}); приводим оба к одному виду
 function toPage<T>(raw: any): Page<T> {
   if (raw?.page) return raw as Page<T>;
@@ -137,6 +141,12 @@ export class RegistrationsApi {
       .pipe(map(toPage<Registration>));
   }
 
+  availableItems(eventId: number): Observable<AvailableOrderItem[]> {
+    return this.http.get<AvailableOrderItem[]>(`${this.url}/available-items`, {
+      params: { eventId },
+    });
+  }
+
   byEvent(eventId: number): Observable<Registration[]> {
     return this.http.get<Registration[]>(`${this.url}/event/${eventId}`);
   }
@@ -171,5 +181,32 @@ export class NotificationsApi {
 
   markAllRead(): Observable<void> {
     return this.http.post<void>(`${this.url}/read-all`, {});
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class PassesApi {
+  private readonly http = inject(HttpClient);
+  private readonly url = '/api/passes';
+
+  get(registrationId: number): Observable<Pass> {
+    return this.http.get<Pass>(`${this.url}/${registrationId}`);
+  }
+
+  pdf(registrationId: number): Observable<Blob> {
+    return this.http.get(`${this.url}/${registrationId}/pdf`, { responseType: 'blob' });
+  }
+
+  checkIn(token: string): Observable<CheckInResult> {
+    return this.http.post<CheckInResult>(`${this.url}/check-in`, { token });
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class RemindersApi {
+  private readonly http = inject(HttpClient);
+
+  run(): Observable<ReminderRun> {
+    return this.http.post<ReminderRun>('/api/reminders/run', {});
   }
 }

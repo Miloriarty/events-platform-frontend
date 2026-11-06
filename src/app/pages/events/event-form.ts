@@ -68,8 +68,8 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
             <textarea matInput formControlName="description" rows="4"></textarea>
           </mat-form-field>
 
-          <div class="form-grid">
-            <mat-form-field>
+          <div class="fields">
+            <mat-form-field class="period" subscriptSizing="dynamic">
               <mat-label>Период проведения</mat-label>
               <mat-date-range-input [rangePicker]="picker" [min]="minStartDate()">
                 <input matStartDate formControlName="startDate" placeholder="Начало" />
@@ -87,7 +87,7 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
               </mat-error>
             </mat-form-field>
 
-            <mat-form-field>
+            <mat-form-field class="category" subscriptSizing="dynamic">
               <mat-label>Категория</mat-label>
               <mat-select formControlName="categoryId">
                 @for (c of categories(); track c.id) {
@@ -102,7 +102,7 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
               <mat-error>Выберите категорию</mat-error>
             </mat-form-field>
 
-            <mat-form-field>
+            <mat-form-field class="location" subscriptSizing="dynamic">
               <mat-label>Локация</mat-label>
               <mat-select formControlName="locationId">
                 @for (l of locations(); track l.id) {
@@ -119,7 +119,7 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
               <mat-error>Выберите локацию</mat-error>
             </mat-form-field>
 
-            <mat-form-field>
+            <mat-form-field class="half" subscriptSizing="dynamic">
               <mat-label>Максимум участников</mat-label>
               <input matInput type="number" min="1" formControlName="maxParticipants" />
               <mat-hint>
@@ -130,6 +130,13 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
                 }
               </mat-hint>
               <mat-error>Должно быть больше 0</mat-error>
+            </mat-form-field>
+
+            <mat-form-field class="half" subscriptSizing="dynamic">
+              <mat-label>Минимальная цена билета, ₽</mat-label>
+              <input matInput type="number" min="0" step="0.01" formControlName="minTicketPrice" />
+              <mat-hint>0 — подходит любой билет</mat-hint>
+              <mat-error>Укажите цену: 0 или больше</mat-error>
             </mat-form-field>
           </div>
 
@@ -156,6 +163,39 @@ function dateRange(group: AbstractControl): ValidationErrors | null {
     mat-card-content {
       padding-top: 16px;
     }
+    form {
+      container-type: inline-size;
+    }
+    /* Ширину считаем по форме, а не по окну: рядом может быть открыто меню */
+    .fields {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+    }
+    .fields mat-form-field {
+      min-width: 0;
+    }
+    @container (min-width: 560px) {
+      .fields {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .period {
+        grid-column: 1 / -1;
+      }
+    }
+    @container (min-width: 860px) {
+      .fields {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+      }
+      .period,
+      .category,
+      .location {
+        grid-column: span 2;
+      }
+      .half {
+        grid-column: span 3;
+      }
+    }
     .actions {
       display: flex;
       justify-content: flex-end;
@@ -180,7 +220,7 @@ export class EventForm implements OnInit {
   protected readonly saving = signal(false);
   protected readonly categories = signal<Category[]>([]);
   protected readonly locations = signal<Location[]>([]);
-  // File — новая картинка, string — текущая с сервера, null — без картинки
+  // File - новая картинка, string - текущая с сервера, null - без картинки
   protected readonly image = signal<File | string | null>(null);
   private originalImageUrl: string | null = null;
   // при редактировании уже прошедшего мероприятия его прежняя дата начала допустима
@@ -200,6 +240,7 @@ export class EventForm implements OnInit {
       categoryId: [null as number | null, Validators.required],
       locationId: [null as number | null, Validators.required],
       maxParticipants: [null as number | null, Validators.min(1)],
+      minTicketPrice: [null as number | null, [Validators.required, Validators.min(0)]],
     },
     { validators: [dateRange, (group) => this.startNotInPast(group)] },
   );
@@ -236,6 +277,7 @@ export class EventForm implements OnInit {
           categoryId: e.category.id,
           locationId: e.location.id,
           maxParticipants: e.maxParticipants,
+          minTicketPrice: e.minTicketPrice,
         });
         this.originalImageUrl = e.imageUrl;
         this.originalStart.set(e.startDate);
@@ -264,6 +306,7 @@ export class EventForm implements OnInit {
       categoryId: v.categoryId!,
       locationId: v.locationId!,
       maxParticipants: v.maxParticipants || null,
+      minTicketPrice: v.minTicketPrice!,
     };
     const id = this.id();
     this.saving.set(true);

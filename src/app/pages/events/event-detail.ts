@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -21,6 +21,7 @@ import { RegisterDialog } from './register-dialog';
   imports: [
     RouterLink,
     DatePipe,
+    CurrencyPipe,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
@@ -94,6 +95,17 @@ import { RegisterDialog } from './register-dialog';
                 {{ e.maxParticipants }} участников
               </div>
             </div>
+            <div class="fact">
+              <mat-icon>confirmation_number</mat-icon>
+              <div>
+                <div class="label">Билет</div>
+                @if (e.minTicketPrice > 0) {
+                  от {{ e.minTicketPrice | currency: 'RUB' }}
+                } @else {
+                  подходит любой
+                }
+              </div>
+            </div>
           </mat-card-content>
           <mat-card-actions>
             @if (auth.isLoggedIn()) {
@@ -152,6 +164,12 @@ import { RegisterDialog } from './register-dialog';
                   >
                     {{ r.status === 'CONFIRMED' ? 'Подтверждена' : 'Отменена' }}
                   </span>
+                </td>
+              </ng-container>
+              <ng-container matColumnDef="checkIn">
+                <th mat-header-cell *matHeaderCellDef>Вход</th>
+                <td mat-cell *matCellDef="let r">
+                  {{ r.checkedInAt ? (r.checkedInAt | date: 'd MMM, HH:mm') : '—' }}
                 </td>
               </ng-container>
               <tr mat-header-row *matHeaderRowDef="columns"></tr>
@@ -232,7 +250,7 @@ export class EventDetail {
   protected readonly event = signal<EventItem | null>(null);
   protected readonly participants = signal<Registration[]>([]);
   protected readonly loading = signal(true);
-  protected readonly columns = ['id', 'userId', 'date', 'status'];
+  protected readonly columns = ['id', 'userId', 'date', 'status', 'checkIn'];
 
   protected readonly past = computed(() => {
     const e = this.event();

@@ -7,7 +7,7 @@ const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_BYTES = 5 * 1024 * 1024;
 
 // Поле картинки с drag & drop.
-// value: File — выбран новый файл, string — URL уже загруженной картинки, null — картинки нет
+// value: File - выбран новый файл, string - URL уже загруженной картинки, null - картинки нет
 @Component({
   selector: 'app-image-drop',
   imports: [MatButtonModule, MatIconModule],
@@ -139,7 +139,7 @@ export class ImageDrop {
   protected readonly preview = signal<string | null>(null);
 
   constructor() {
-    // для нового файла — временный blob:-URL, освобождается при смене значения
+    // для нового файла - временный blob:-URL, освобождается при смене значения
     effect((onCleanup) => {
       const v = this.value();
       if (v instanceof File) {

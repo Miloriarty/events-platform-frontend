@@ -13,7 +13,7 @@ export interface CurrentUser {
   exp: number;
 }
 
-// Токен выпускает user-service: sub — id пользователя, claims username и role
+// Токен выпускает user-service: sub - id пользователя, claims username и role
 function decode(token: string): CurrentUser | null {
   try {
     const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
@@ -96,7 +96,7 @@ export class AuthService {
       if (token) localStorage.setItem(TOKEN_KEY, token);
       else localStorage.removeItem(TOKEN_KEY);
     } catch {
-      // хранилище недоступно — токен живёт только в памяти
+      // хранилище недоступно - токен живет только в памяти
     }
   }
 }

@@ -15,6 +15,7 @@ const ICONS: Record<NotificationType, string> = {
   ORDER_CANCELLED: 'cancel',
   REGISTRATION_CREATED: 'how_to_reg',
   REGISTRATION_CANCELLED: 'event_busy',
+  EVENT_REMINDER: 'alarm',
 };
 
 @Component({

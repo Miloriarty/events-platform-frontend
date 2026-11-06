@@ -63,12 +63,6 @@ body {
   width: 100%;
 }
 
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  column-gap: 16px;
-}
-
 .table-wrap {
   overflow-x: auto;
   border: 1px solid var(--mat-sys-outline-variant);
@@ -80,7 +74,7 @@ body {
 }
 
 // Колонка с иконками-кнопками: ячейки mat-table обрезают содержимое с «…»,
-// поэтому даём ширину под две кнопки и отключаем обрезку
+// поэтому даем ширину под две кнопки и отключаем обрезку
 .mat-mdc-cell.row-actions {
   width: 112px;
   min-width: 112px;
@@ -89,6 +83,12 @@ body {
   white-space: nowrap;
   overflow: visible;
   text-overflow: clip;
+}
+
+// Даты в таблицах не переносятся: иначе строка «6 нояб. 2026, 13:59» занимает три ряда
+.mat-mdc-cell.mat-column-date,
+.mat-mdc-cell.mat-column-createdAt {
+  white-space: nowrap;
 }
 
 .status-chip {

@@ -4,9 +4,11 @@ import localeRu from '@angular/common/locales/ru';
 import { ApplicationConfig, LOCALE_ID, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { MAT_DATE_LOCALE, provideNativeDateAdapter } from '@angular/material/core';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
+import { MatPaginatorIntl } from '@angular/material/paginator';
 import { provideRouter, withComponentInputBinding } from '@angular/router';
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth.interceptor';
+import { RuPaginatorIntl } from './core/paginator-intl';
 
 registerLocaleData(localeRu);
 
@@ -19,5 +21,6 @@ export const appConfig: ApplicationConfig = {
     { provide: LOCALE_ID, useValue: 'ru' },
     { provide: MAT_DATE_LOCALE, useValue: 'ru-RU' },
     { provide: MAT_FORM_FIELD_DEFAULT_OPTIONS, useValue: { appearance: 'outline' } },
+    { provide: MatPaginatorIntl, useClass: RuPaginatorIntl },
   ],
 };

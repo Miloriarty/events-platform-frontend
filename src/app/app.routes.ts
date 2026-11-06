@@ -68,6 +68,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/notifications/notifications').then((m) => m.Notifications),
   },
   {
+    path: 'check-in',
+    canActivate: [roleGuard('MANAGER', 'ADMIN')],
+    title: 'Проверка билетов',
+    loadComponent: () => import('./pages/check-in/check-in').then((m) => m.CheckIn),
+  },
+  {
     path: 'catalog',
     canActivate: [roleGuard('MANAGER', 'ADMIN')],
     title: 'Справочники',

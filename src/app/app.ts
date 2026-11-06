@@ -28,6 +28,12 @@ const NAV: NavItem[] = [
   { path: '/orders', label: 'Мои заказы', icon: 'shopping_bag', auth: true },
   { path: '/registrations', label: 'Мои регистрации', icon: 'how_to_reg', auth: true },
   { path: '/my-events', label: 'Мои мероприятия', icon: 'event_note', roles: ['MANAGER', 'ADMIN'] },
+  {
+    path: '/check-in',
+    label: 'Проверка билетов',
+    icon: 'qr_code_scanner',
+    roles: ['MANAGER', 'ADMIN'],
+  },
   { path: '/catalog', label: 'Справочники', icon: 'category', roles: ['MANAGER', 'ADMIN'] },
   { path: '/users', label: 'Пользователи', icon: 'group', roles: ['ADMIN'] },
 ];
